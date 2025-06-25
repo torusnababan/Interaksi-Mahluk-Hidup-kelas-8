@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kuis IPA SMP Interaksi Mahluk Hidup Dengan Lingkungan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    input[type="text"] {
+      width: 300px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    #timer {
+      font-weight: bold;
+      color: red;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Kuis IPA SMP</h2>
+  <h2>By: Torus Manuntun Nababan, M.Pd</h2>
+  <h2>Materi: Interaksi Mahluk Hidup Dengan Lingkungan</h2>
+  <!-- Form Identitas -->
+  <div id="identityForm">
+    <h3>Silakan isi identitas terlebih dahulu:</h3>
+    <label>Nama:
+      <input type="text" id="nama" required>
+    </label>
+    <label>Kelas:
+      <input type="text" id="kelas" required>
+    </label>
+    <label>Tahun Ajaran:
+      <input type="text" id="tahun" required>
+    </label>
+    <label>Nama Sekolah:
+      <input type="text" id="sekolah" required>
+    </label>
+    <button onclick="startQuiz()">Mulai Kuis</button>
+  </div>
+
+  <!-- Timer -->
+  <div id="timer" class="hidden"></div>
+
+  <!-- Form Soal -->
+  <form id="quizForm" class="hidden">
+    <div id="questionsContainer"></div>
+    <button type="button" onclick="submitQuiz()">Selesai dan Lihat Skor</button>
+  </form>
+
+  <div id="result" class="hidden"></div>
+
+  <script>
+    const questions = [
+      { question: "1. Interaksi antara makhluk hidup dengan lingkungannya disebut juga dengan...", options: ["Populasi", "Ekosistem", "Komunitas", "Habitat"], answer: "Ekosistem" },
+    { question: "2. Komponen biotik dalam ekosistem terdiri atas...", options: ["Tanah dan udara", "Air dan batu", "Tumbuhan, hewan, manusia", "Air dan cahaya"], answer: "Tumbuhan, hewan, manusia" },
+    { question: "3. Komponen abiotik meliputi hal-hal berikut, kecuali...", options: ["Air", "Cahaya", "Tumbuhan", "Suhu"], answer: "Tumbuhan" },
+    { question: "4. Tempat tinggal alami suatu makhluk hidup disebut...", options: ["Nisbah", "Habitat", "Ekosistem", "Komunitas"], answer: "Habitat" },
+    { question: "5. Hubungan antara burung jalak dan kerbau merupakan contoh simbiosis...", options: ["Parasitisme", "Mutualisme", "Komensalisme", "Netralisme"], answer: "Mutualisme" },
+    { question: "6. Interaksi antar makhluk hidup yang merugikan salah satu pihak disebut simbiosis...", options: ["Mutualisme", "Komensalisme", "Parasitisme", "Netralisme"], answer: "Parasitisme" },
+    { question: "7. Simbiosis antara benalu dan pohon inangnya termasuk dalam simbiosis...", options: ["Mutualisme", "Komensalisme", "Parasitisme", "Amensalisme"], answer: "Parasitisme" },
+    { question: "8. Organisme yang membuat makanan sendiri disebut...", options: ["Heterotrof", "Herbivor", "Autotrof", "Konsumen"], answer: "Autotrof" },
+    { question: "9. Rantai makanan dimulai dari...", options: ["Konsumen primer", "Pengurai", "Produsen", "Konsumen sekunder"], answer: "Produsen" },
+    { question: "10. Dalam rantai makanan, konsumen tingkat dua disebut juga sebagai...", options: ["Konsumen primer", "Konsumen sekunder", "Produsen", "Pengurai"], answer: "Konsumen sekunder" },
+    { question: "11. Jaring-jaring makanan tersusun atas beberapa...", options: ["Produsen", "Konsumen", "Rantai makanan", "Pengurai"], answer: "Rantai makanan" },
+    { question: "12. Contoh organisme pengurai adalah...", options: ["Jamur dan bakteri", "Singa dan harimau", "Tumbuhan dan lumut", "Ikan dan udang"], answer: "Jamur dan bakteri" },
+    { question: "13. Faktor yang dapat menyebabkan ketidakseimbangan ekosistem adalah...", options: ["Daur ulang", "Perburuan liar", "Reboisasi", "Penghijauan"], answer: "Perburuan liar" },
+    { question: "14. Organisme yang menduduki tingkat trofik pertama adalah...", options: ["Konsumen primer", "Konsumen sekunder", "Produsen", "Pengurai"], answer: "Produsen" },
+    { question: "15. Peran manusia yang dapat menjaga keseimbangan ekosistem adalah...", options: ["Menebang pohon liar", "Melakukan daur ulang", "Membuang limbah ke sungai", "Berburu hewan langka"], answer: "Melakukan daur ulang" },
+    { question: "16. Salah satu akibat dari punahnya satu spesies dalam rantai makanan adalah...", options: ["Tidak ada pengaruh apa-apa", "Terjadi ketidakseimbangan ekosistem", "Jumlah produsen bertambah", "Konsumen hilang semua"], answer: "Terjadi ketidakseimbangan ekosistem" },
+    { question: "17. Makhluk hidup yang mendapatkan makanan dengan memakan organisme lain disebut...", options: ["Produsen", "Konsumen", "Pengurai", "Autotrof"], answer: "Konsumen" },
+    { question: "18. Dalam ekosistem sawah, padi berperan sebagai...", options: ["Konsumen", "Pengurai", "Produsen", "Parasit"], answer: "Produsen" },
+    { question: "19. Semua populasi makhluk hidup yang menempati suatu tempat tertentu disebut...", options: ["Habitat", "Ekosistem", "Komunitas", "Nisbah"], answer: "Komunitas" },
+    { question: "20. Faktor abiotik yang paling berpengaruh terhadap fotosintesis adalah...", options: ["Cahaya", "Angin", "Batu", "Kelembapan"], answer: "Cahaya" }
+  ];
+
+    let quizTimer;
+    let countdownInterval;
+    const timeLimit = 20 * 60 * 1000; // 20 menit
+
+    function startQuiz() {
+      const nama = document.getElementById('nama').value;
+      const kelas = document.getElementById('kelas').value;
+      const tahun = document.getElementById('tahun').value;
+      const sekolah = document.getElementById('sekolah').value;
+
+      if (!nama || !kelas || !tahun || !sekolah) {
+        alert("Harap lengkapi semua data identitas.");
+        return;
+      }
+
+      document.getElementById('identityForm').classList.add('hidden');
+      document.getElementById('quizForm').classList.remove('hidden');
+      document.getElementById('timer').classList.remove('hidden');
+
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = "";
+      questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.classList.add('question');
+        div.innerHTML = `<p>${q.question}</p>` + q.options.map(opt => `
+          <label><input type="radio" name="q${index}" value="${opt}"> ${opt}</label><br>`).join('');
+        container.appendChild(div);
+      });
+
+      // Timer otomatis submit setelah 20 menit
+      quizTimer = setTimeout(() => {
+        alert("Waktu habis! Kuis akan otomatis disubmit.");
+        submitQuiz();
+      }, timeLimit);
+
+      // Countdown display
+      let remaining = timeLimit / 1000;
+      const timerDisplay = document.getElementById('timer');
+      timerDisplay.textContent = `Sisa waktu: ${remaining} detik`;
+      countdownInterval = setInterval(() => {
+        remaining--;
+        timerDisplay.textContent = `Sisa waktu: ${remaining} detik`;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    function submitQuiz() {
+      clearTimeout(quizTimer);
+      clearInterval(countdownInterval);
+
+      let score = 0;
+      questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        if (selected && selected.value === q.answer) {
+          score += 10;
+        }
+      });
+
+      document.getElementById('quizForm').classList.add('hidden');
+      document.getElementById('timer').classList.add('hidden');
+      const resultDiv = document.getElementById('result');
+      resultDiv.classList.remove('hidden');
+
+      const nama = document.getElementById('nama').value;
+      const kelas = document.getElementById('kelas').value;
+      const tahun = document.getElementById('tahun').value;
+      const sekolah = document.getElementById('sekolah').value;
+
+      let message = "";
+      if (score >= 70) {
+        message = "<p style='color: green;'><strong>Selamat!</strong> Anda Sudah Bisa Melanjutkan ke Materi Berikutnya.</p>";
+      } else {
+        message = "<p style='color: red;'><strong>Mohon maaf.</strong> Silakan pelajari kembali materi ini sebelum melanjutkan ke materi berikutnya.</p>";
+      }
+
+      resultDiv.innerHTML = `
+        <h3>Hasil Kuis</h3>
+        <p><strong>Nama:</strong> ${nama}</p>
+        <p><strong>Kelas:</strong> ${kelas}</p>
+        <p><strong>Tahun Ajaran:</strong> ${tahun}</p>
+        <p><strong>Sekolah:</strong> ${sekolah}</p>
+        <p><strong>Skor Anda:</strong> ${score} dari 200</p>
+        ${message}
+      `;
+    }
+  </script>
+</body>
+</html>
